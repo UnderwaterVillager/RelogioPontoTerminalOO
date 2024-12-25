@@ -2,13 +2,16 @@ import os
 import json
 from abc import ABC, abstractmethod
 
-# TODO implementar validação
-# Cada validação pode ser instanciada no setter
+from models import Worker
+
+# Interfaces de login e cadastro;
+## TODO implementar validação
+## Cada validação pode ser instanciada no setter
 class UserDataHandler(ABC):
     def __init__(self):
         self._file_path = "ponto_data.json"
         self._menu_type = None
-        ## Campo útil a possível valições;
+        ### Campo útil a possível valições;
         self._data_structure = {
             "Matricula" : None,
             "Senha": None,
@@ -38,6 +41,10 @@ class UserDataHandler(ABC):
     
     @code.setter
     def code(self, value):
+        if value[0] not in ['1', '2', '3']:
+            os.system('clear')
+            print("Nao ha cargo associado com a matricula inserida.")
+            raise ValueError("Nao ha cargo associado com a matricula inserida.")
         print("Matricula validado")
         self._code = value
     
@@ -56,7 +63,7 @@ class UserDataHandler(ABC):
             obj_ds[i] = prompt_data
         self.data_structure = obj_ds
 
-    # Cada setter retorna o valor validado e o estado de validação
+    ### Cada setter retorna o valor validado e o estado de validação
     def set_data(self):
         self.code = self.data_structure["Matricula"]
 
@@ -93,10 +100,13 @@ class UserDataHandler(ABC):
             for i, j in list(self.data_structure.items()):
                 print(f'{i}: {j}\n')
 
-            # Preparar validação;
-            self.set_data()
-
+            
             confirmation = input("Confirmar(DIGITE UM NÚMERO)?\n1- SIM\n2-NÃO\n")
+
+            try:
+                self.set_data()
+            except:
+                continue
 
             match confirmation:
                 case '1':
@@ -121,8 +131,8 @@ class SignUpInterface(UserDataHandler):
             "Email": None,
             "Senha": None,
         }
-        self._code = self._data_structure["Nome"]
-        self._password = self._data_structure["Email"]
+        self._name = self._data_structure["Nome"]
+        self._email = self._data_structure["Email"]
 
     @property
     def name(self):
@@ -142,10 +152,19 @@ class SignUpInterface(UserDataHandler):
         print("Email validado")
         self._email = value
 
+
     def set_data(self):
         self.name = self.data_structure["Nome"]
         self.code = self.data_structure["Matricula"]
         self.email = self.data_structure["Email"]
+
+    # def create_file_path(self):
+    #     try:
+    #         os.mkdir(f'banco_folhas/{self.data_structure["Matricula"]}/')
+    #     except FileExistsError:
+    #         print("Diretório da referida matricula ja existe.")
+    #     except Exception as e:
+    #         print(f'Ocorreu um erro: {e}')
 
     def write_json(self, new_data, retrieved_data=[]):
         try:
@@ -183,7 +202,8 @@ class SignInInterface(UserDataHandler):
             if data_entry["Matricula"] == self.data_structure["Matricula"]:
                 if data_entry["Senha"] == self.data_structure["Senha"]:
                     print("Login realizado!")
-                    return
+                    self.role_page_start(list(self.data_structure['Matricula'])[0])
+                    return self.code
                 else:
                     os.system('clear')
                     print("Senha incorreta!")
@@ -192,10 +212,32 @@ class SignInInterface(UserDataHandler):
         print("Cadastro não encontrado!")
         raise Exception("Cadastro não encontrado!")
 
+# Fim de Interface de Login e Cadastro
 
-        
 
+
+
+
+# Interface Inicial
 class MainMenu:
+    def menu_signup():
+        cadastro = SignUpInterface()
+        cadastro.menu()
+
+    def menu_login():
+        login = SignInInterface()
+        logged_code = login.menu()
+        return logged_code
+    
+    def role_router(code):
+        if code[0] == '1':
+            user = Worker()
+            return user
+        elif code[0] == '2':
+            pass
+        else:
+            print("Cargo de matricula invalido!")
+
     def display_options(self):
         os.system('clear')
         while(True):
@@ -203,13 +245,16 @@ class MainMenu:
             match enter_option:
                 case '1':
                     os.system('clear')
-                    login = SignInInterface()
-                    login.menu()
+                    logged_code = self.menu_login()
+                    print(logged_code, logged_code[0])
+                    user_page = self.role_router(logged_code)
+                    if user_page:
+                        # user_page.run()
+                        pass
                     continue
                 case '2':
                     os.system('clear')
-                    cadastro = SignUpInterface()
-                    cadastro.menu()
+                    self.menu_signup()
                     continue
                 case _:
                     os.system("clear")
