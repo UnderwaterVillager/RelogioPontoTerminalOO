@@ -2,7 +2,7 @@ import os
 import json
 from abc import ABC, abstractmethod
 
-from models import Worker
+from user_models import Worker
 
 # Interfaces de login e cadastro;
 ## TODO implementar validação
@@ -41,11 +41,10 @@ class UserDataHandler(ABC):
     
     @code.setter
     def code(self, value):
-        if value[0] not in ['1', '2', '3']:
+        if value and value[0] not in ['1', '2', '3']:
             os.system('clear')
             print("Nao ha cargo associado com a matricula inserida.")
             raise ValueError("Nao ha cargo associado com a matricula inserida.")
-        print("Matricula validado")
         self._code = value
     
     @property
@@ -67,6 +66,8 @@ class UserDataHandler(ABC):
     def set_data(self):
         self.code = self.data_structure["Matricula"]
 
+    def null_data(self):
+        self.code = None
 
     def read_json(self):
         try:
@@ -87,9 +88,9 @@ class UserDataHandler(ABC):
     def menu(self):
         while(True):
             print(f"Esta é a tela de {self.menu_type}")
-            forward = input("1- Inserir dados\n2- Voltar ao início\n")
+            forward = input("1- Inserir dados\nOutros- Voltar ao início\n")
 
-            if forward == '2':
+            if forward != '1':
                 break
 
             self.input_data(self.data_structure)
@@ -101,22 +102,24 @@ class UserDataHandler(ABC):
                 print(f'{i}: {j}\n')
 
             
-            confirmation = input("Confirmar(DIGITE UM NÚMERO)?\n1- SIM\n2-NÃO\n")
+            confirmation = input("Confirmar(DIGITE UM NÚMERO)?\n1- SIM\nOutros- NÃO\n")
 
             try:
+                os.system('clear')
                 self.set_data()
             except:
+                os.system('clear')
+                self.null_data()
                 continue
 
             match confirmation:
                 case '1':
                     try:
-                        os.system('clear')
-                        self.finish_data_handler()
+                        result = self.finish_data_handler()
+                        return result
                     except:
                         continue
-                    break
-                case '2':
+                case _:
                     os.system('clear')
                     continue
 
@@ -140,7 +143,6 @@ class SignUpInterface(UserDataHandler):
     
     @name.setter
     def name(self, value):
-        print("Nome validado")
         self._name = value
 
     @property
@@ -149,7 +151,6 @@ class SignUpInterface(UserDataHandler):
     
     @email.setter
     def email(self, value):
-        print("Email validado")
         self._email = value
 
 
@@ -158,13 +159,19 @@ class SignUpInterface(UserDataHandler):
         self.code = self.data_structure["Matricula"]
         self.email = self.data_structure["Email"]
 
-    # def create_file_path(self):
-    #     try:
-    #         os.mkdir(f'banco_folhas/{self.data_structure["Matricula"]}/')
-    #     except FileExistsError:
-    #         print("Diretório da referida matricula ja existe.")
-    #     except Exception as e:
-    #         print(f'Ocorreu um erro: {e}')
+    def null_data(self):
+        self.name = None
+        self.code = None
+        self.email = None
+
+
+    def create_file_path(self):
+        try:
+            os.mkdir(f'banco_folhas/{self.data_structure["Matricula"]}/')
+        except FileExistsError:
+            print("Diretório da referida matricula ja existe.")
+        except Exception as e:
+            print(f'Ocorreu um erro: {e}')
 
     def write_json(self, new_data, retrieved_data=[]):
         try:
@@ -188,6 +195,8 @@ class SignUpInterface(UserDataHandler):
                         print("Matricula existente!")
                         raise Exception("Matricula existente!")
                 self.write_json(self.data_structure, db_data)
+                self.create_file_path()
+                print("Cadastro realizado")
         except:
             print("Algo deu errado com o cadastro.")
     
@@ -202,7 +211,6 @@ class SignInInterface(UserDataHandler):
             if data_entry["Matricula"] == self.data_structure["Matricula"]:
                 if data_entry["Senha"] == self.data_structure["Senha"]:
                     print("Login realizado!")
-                    self.role_page_start(list(self.data_structure['Matricula'])[0])
                     return self.code
                 else:
                     os.system('clear')
@@ -220,43 +228,40 @@ class SignInInterface(UserDataHandler):
 
 # Interface Inicial
 class MainMenu:
-    def menu_signup():
+    def menu_signup(self):
         cadastro = SignUpInterface()
         cadastro.menu()
 
-    def menu_login():
+    def menu_login(self):
         login = SignInInterface()
         logged_code = login.menu()
         return logged_code
     
-    def role_router(code):
-        if code[0] == '1':
-            user = Worker()
-            return user
-        elif code[0] == '2':
-            pass
-        else:
-            print("Cargo de matricula invalido!")
 
     def display_options(self):
-        os.system('clear')
         while(True):
-            enter_option = input("Escolha a sua opção:\n1- Iniciar sessão\n2- Cadastrar-se\n")
+            os.system('clear')
+            enter_option = input("Escolha a sua opção:\n1- Iniciar sessão\n2- Cadastrar-se\nOutros- Sair\n")
             match enter_option:
                 case '1':
                     os.system('clear')
                     logged_code = self.menu_login()
-                    print(logged_code, logged_code[0])
-                    user_page = self.role_router(logged_code)
-                    if user_page:
-                        # user_page.run()
-                        pass
+
+                    if logged_code:
+                        match logged_code[0]:
+                            case '1':
+                                user = Worker(logged_code)
+                            case '2':
+                                pass
+                            case _:
+                                break
+                        if user:
+                            user.run()
                     continue
                 case '2':
                     os.system('clear')
                     self.menu_signup()
                     continue
                 case _:
-                    os.system("clear")
-                    print("Escolha as opções disponíveis.")
+                    return
                 
