@@ -1,4 +1,4 @@
 tests/
-banco_folhas/
+db/
 ponto_data.json
 __pycache__/

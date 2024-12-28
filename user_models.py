@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 
-from clock_interfaces import  Clock
+from clock_interfaces import  Clock, ClockDocView
 
 class User:
     def __init__(self, code):
@@ -33,6 +33,9 @@ class Worker(User):
                     clock.run()
                     continue
                 case '2':
+                    os.system('clear')
+                    clock_doc_viewer = ClockDocView(self.code)
+                    clock_doc_viewer.view_worker_doc()
                     pass
                 case '3':
                     pass

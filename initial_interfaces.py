@@ -91,6 +91,7 @@ class UserDataHandler(ABC):
             forward = input("1- Inserir dados\nOutros- Voltar ao início\n")
 
             if forward != '1':
+                os.system('clear')
                 break
 
             self.input_data(self.data_structure)
@@ -167,7 +168,9 @@ class SignUpInterface(UserDataHandler):
 
     def create_file_path(self):
         try:
-            os.mkdir(f'banco_folhas/{self.data_structure["Matricula"]}/')
+            os.mkdir(f'db/{self.data_structure["Matricula"]}/')
+            if self.code[0] == '1':
+                os.mkdir(f'db/{self.data_structure["Matricula"]}/folhas/')
         except FileExistsError:
             print("Diretório da referida matricula ja existe.")
         except Exception as e:
@@ -188,15 +191,17 @@ class SignUpInterface(UserDataHandler):
         try:
             db_data = self.read_json()
             if not db_data:
+                self.create_file_path()
                 self.write_json(self.data_structure)
+                print("Cadastro realizado")
             else:
                 for i in db_data:
                     if i["Matricula"] == self.data_structure["Matricula"]:
                         print("Matricula existente!")
                         raise Exception("Matricula existente!")
-                self.write_json(self.data_structure, db_data)
                 self.create_file_path()
-                print("Cadastro realizado")
+                self.write_json(self.data_structure, db_data)
+                print("Cadastro realizado!")
         except:
             print("Algo deu errado com o cadastro.")
     
@@ -240,7 +245,6 @@ class MainMenu:
 
     def display_options(self):
         while(True):
-            os.system('clear')
             enter_option = input("Escolha a sua opção:\n1- Iniciar sessão\n2- Cadastrar-se\nOutros- Sair\n")
             match enter_option:
                 case '1':
