@@ -9,7 +9,7 @@ from user_models import Worker
 ## Cada validação pode ser instanciada no setter
 class UserDataHandler(ABC):
     def __init__(self):
-        self._file_path = "db/cadastro_data.json"
+        self._file_path = None
         self._menu_type = None
         ### Campo útil a possível valições;
         self._data_structure = {
@@ -22,6 +22,10 @@ class UserDataHandler(ABC):
     @property
     def file_path(self):
         return self._file_path
+    
+    @file_path.setter
+    def file_path(self, value):
+        self._file_path = value
 
     @property
     def menu_type(self):
@@ -41,10 +45,14 @@ class UserDataHandler(ABC):
     
     @code.setter
     def code(self, value):
-        if value and value[0] not in ['1', '2', '3']:
+        if value and value[0] not in ['1', '2']:
             os.system('clear')
             print("Nao ha cargo associado com a matricula inserida.")
             raise ValueError("Nao ha cargo associado com a matricula inserida.")
+        if value[0] == '1':
+            self.file_path = 'db/pontista_dados_cadastro.json'
+        elif value[0] == '2':
+            self.file_path ='db/supervisor_dados_cadastro.json'
         self._code = value
     
     @property
@@ -212,6 +220,8 @@ class SignInInterface(UserDataHandler):
 
     def finish_data_handler(self):
         db_data = self.read_json()
+        if not db_data:
+            print("Cadastro não encontrado!")
         for data_entry in db_data:
             if data_entry["Matricula"] == self.data_structure["Matricula"]:
                 if data_entry["Senha"] == self.data_structure["Senha"]:
