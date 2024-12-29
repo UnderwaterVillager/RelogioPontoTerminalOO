@@ -11,9 +11,6 @@ class User:
     def code(self):
         return self._code
 
-    def profile():
-        pass
-
 
 class Worker(User):
     def __init__(self, code):
@@ -35,11 +32,29 @@ class Worker(User):
                 case '2':
                     os.system('clear')
                     clock_doc_viewer = ClockDocView(self.code)
-                    clock_doc_viewer.view_worker_doc()
-                    pass
+                    clock_doc_viewer.run()
+                    continue
                 case '3':
                     pass
                 case _:
                     os.system('clear')
                     break
 
+class Supervisor(User):
+
+    def run(self):
+        while True:
+            print("Escolha a operação:")
+            operation = input("1- Adicionar pontista\n2- Ver pontista\n3- Ver folha do dia\nOutros- Voltar\n")
+            match operation:
+                case '1':
+                    os.system('clear')
+                    pass
+                case '2':
+                    os.system('clear')
+                    pass
+                case '3':
+                    pass
+                case _:
+                    os.system('clear')
+                    break
