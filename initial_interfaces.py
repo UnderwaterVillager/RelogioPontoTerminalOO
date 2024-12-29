@@ -9,7 +9,7 @@ from user_models import Worker
 ## Cada validação pode ser instanciada no setter
 class UserDataHandler(ABC):
     def __init__(self):
-        self._file_path = "ponto_data.json"
+        self._file_path = "db/cadastro_data.json"
         self._menu_type = None
         ### Campo útil a possível valições;
         self._data_structure = {
