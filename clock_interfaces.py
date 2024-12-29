@@ -146,7 +146,7 @@ class ClockDocView:
     def code(self):
         return self._code
 
-    def view_worker_doc(self):
+    def run(self):
         selected_month = input("Selecione um mes:\n")
         selected_year = input("Selecione um ano:\n")
         clock_doc_cli = ClockRegisterDocHandler(self.code, f"{selected_month}-{selected_year}")
