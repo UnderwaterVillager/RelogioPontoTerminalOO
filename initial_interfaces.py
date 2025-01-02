@@ -45,10 +45,12 @@ class UserDataHandler(ABC):
     
     @code.setter
     def code(self, value):
-        if value and value[0] not in ['1', '2']:
+        if not value:
+            return
+        if value[0] not in ['1', '2']:
             os.system('clear')
             print("Nao ha cargo associado com a matricula inserida.")
-            raise ValueError("Nao ha cargo associado com a matricula inserida.")
+            return
         if value[0] == '1':
             self.file_path = 'db/pontista_dados_cadastro.json'
         elif value[0] == '2':
@@ -77,7 +79,7 @@ class UserDataHandler(ABC):
     def null_data(self):
         self.code = None
 
-    def read_json(self):
+    def read_self_json(self):
         try:
             if (os.stat(self.file_path).st_size == 0):
                 return None
@@ -125,6 +127,7 @@ class UserDataHandler(ABC):
                 case '1':
                     try:
                         result = self.finish_data_handler()
+                        ok = input("diga ok")
                         return result
                     except:
                         continue
@@ -162,7 +165,6 @@ class SignUpInterface(UserDataHandler):
     def email(self, value):
         self._email = value
 
-
     def set_data(self):
         self.name = self.data_structure["Nome"]
         self.code = self.data_structure["Matricula"]
@@ -184,7 +186,8 @@ class SignUpInterface(UserDataHandler):
         except Exception as e:
             print(f'Ocorreu um erro: {e}')
 
-    def write_json(self, new_data, retrieved_data=[]):
+    def write_json(self, new_data, retrieved_data):
+        print(f'rd:\n{retrieved_data}\n')
         try:
             with open(self.file_path, "w") as db:
                 if isinstance(retrieved_data, list):
@@ -193,14 +196,17 @@ class SignUpInterface(UserDataHandler):
             print("Gravação concluída!")
         except:
             print("Algo de errado ocorreu com a gravação de dados.")
+            raise Exception("Algo de errado ocorreu com a gravação de dados.")
 
 
     def finish_data_handler(self):
         try:
-            db_data = self.read_json()
+            db_data = self.read_self_json()
+            print(db_data)
             if not db_data:
                 self.create_file_path()
-                self.write_json(self.data_structure)
+                print(f"ds:\n{self.data_structure}\n")
+                self.write_json(self.data_structure, [])
                 print("Cadastro realizado")
             else:
                 for i in db_data:
@@ -219,7 +225,7 @@ class SignInInterface(UserDataHandler):
         self._menu_type = 'login'
 
     def finish_data_handler(self):
-        db_data = self.read_json()
+        db_data = self.read_self_json()
         if not db_data:
             print("Cadastro não encontrado!")
         for data_entry in db_data:
