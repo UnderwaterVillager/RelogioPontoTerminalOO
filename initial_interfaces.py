@@ -127,7 +127,6 @@ class UserDataHandler(ABC):
                 case '1':
                     try:
                         result = self.finish_data_handler()
-                        ok = input("diga ok")
                         return result
                     except:
                         continue

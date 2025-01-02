@@ -19,36 +19,67 @@ class ClockRegisterDocHandler:
     @property
     def selected_date(self):
         return self._selected_date
-
-    def get_file(self):
+    
+    def get_json_day(self, month, day):
         try:
-            if (os.stat(f'{self.file_path}{self.selected_date}.json').st_size == 0):
+            if(os.stat(f'db/folhas_diarias/{month}/{day}.json').st_size == 0):
                 return None
         except FileNotFoundError:
-            print("Arquivo não encontrado.")
-            return None
+            print("Arquivo do dia não encontrado.")
         try:
-            with open(f'{self.file_path}{self.selected_date}.json', 'r') as doc:
-                clock_list = json.load(doc)
-                print("Carregado.")
-                return clock_list
+            with open(f'db/folhas_diarias/{month}/{day}.json') as doc:
+                day_list = json.load(doc)
+                print("Carregado ao dia.")
+                return day_list
         except:
-            print("Erro ao carregar folha de ponto.")
+            print("Erro ao carregar folha do dia.")
 
-    def write_file(self, new_data, current_data=[]):
+    def write_json_day(self, new_data, current_data):
         try:
             if isinstance(current_data, list):
                 current_data.append(new_data)
             else:
+                print("Dados do ponto em formato incorreto.")
+                return None
+            if not os.path.exists(f'db/folhas_diarias/{new_data["Mes"]}/'):
+                os.mkdir(f'db/folhas_diarias/{new_data["Mes"]}/')
+            with open(f'db/folhas_diarias/{new_data["Mes"]}/{new_data["Dia"]}.json', 'w') as doc:
+                json.dump(current_data, doc)
+                print("Arquivo do dia salvo.")
+        except:
+            print('Erro ao escrever na folha do dia.')
+
+
+    def get_json_personal(self):
+        try:
+            if (os.stat(f'{self.file_path}{self.selected_date}.json').st_size == 0):
+                return None
+        except FileNotFoundError:
+            print("Arquivo do pontista não encontrado.")
+            return None
+        try:
+            with open(f'{self.file_path}{self.selected_date}.json', 'r') as doc:
+                clock_list = json.load(doc)
+                print("Carregado ao pontista.")
+                return clock_list
+        except:
+            print("Erro ao carregar folha de ponto.")
+
+    def write_json_personal(self, new_data, current_data):
+        try:
+            if isinstance(current_data, list):
+                current_data.append(new_data)
+            else:
+                print("Dados do ponto em formato incorreto.")
                 return None
             with open(f'{self.file_path}{self.selected_date}.json', 'w') as doc:
                 json.dump(current_data, doc)
-                print("Arquivo salvo.")
+                print("Arquivo do pontista salvo.")
         except:
             print('Erro ao escrever na folha de ponto.')
             
     def view_clock_doc(self):
-        current_data = self.get_file()
+        current_data = self.get_json_personal()
         if current_data:
             print(f"Folha de {self.code}")
             print("*------------------------------*")
@@ -59,18 +90,30 @@ class ClockRegisterDocHandler:
         print("Dados não encontrados.")
 
 
-    def save_clock(self, new_data):
-        current_data = self.get_file()
+    def save_clock_personal(self, new_data):
+        current_data = self.get_json_personal()
         if current_data and isinstance(current_data, list):
             for i in current_data:
                 if (i['Dia'] == new_data['Dia']) and (i['Mes'] == new_data['Mes']) and (i['Ano'] == new_data['Ano']) and (i['Modo'] == new_data['Modo']):
                     print("Não é possível bater o mesmo tipo de ponto duas vezes no dia.")
-                    return
-            self.write_file(new_data, current_data)
+                    raise Exception("Ponto batido no mesmo dia.")
+            self.write_json_personal(new_data, current_data)
         else:
-            self.write_file(new_data)
+            self.write_json_personal(new_data, [])
 
-            
+    def save_clock_day(self, new_data):
+        current_data = self.get_json_day(new_data["Mes"], new_data["Dia"])
+        if current_data and isinstance(current_data, list):
+            self.write_json_day(new_data, current_data)
+        else:
+            self.write_json_day(new_data, [])
+
+    def save_clock(self, new_data):
+        try:   
+            self.save_clock_personal(new_data)
+            self.save_clock_day(new_data)
+        except:
+            print("Erro ao salvar ponto.")
 
 class Clock:
     def __init__(self, code):
