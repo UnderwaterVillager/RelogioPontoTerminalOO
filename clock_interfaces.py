@@ -2,6 +2,7 @@ from datetime import datetime
 import os, json
 
 class ClockRegisterDocHandler:
+    doc_day_structure = {"Entrada": [], "Saida": []}
 
     def __init__(self, code, date):
         self._selected_date = date
@@ -20,24 +21,28 @@ class ClockRegisterDocHandler:
     def selected_date(self):
         return self._selected_date
     
-    def get_json_day(self, month, day):
+    def get_json_day(self, month, day, mode):
         try:
             if(os.stat(f'db/folhas_diarias/{month}/{day}.json').st_size == 0):
                 return None
         except FileNotFoundError:
             print("Arquivo do dia não encontrado.")
+            return None
         try:
             with open(f'db/folhas_diarias/{month}/{day}.json') as doc:
-                day_list = json.load(doc)
+                day_dict = json.load(doc)
                 print("Carregado ao dia.")
-                return day_list
+                return day_dict
         except:
             print("Erro ao carregar folha do dia.")
 
     def write_json_day(self, new_data, current_data):
+        mode = new_data["Modo"]
         try:
-            if isinstance(current_data, list):
-                current_data.append(new_data)
+            if isinstance(current_data, dict):
+                writing_list = current_data[mode]
+                if isinstance(writing_list, list):
+                    writing_list.append(new_data)
             else:
                 print("Dados do ponto em formato incorreto.")
                 return None
@@ -71,7 +76,7 @@ class ClockRegisterDocHandler:
                 current_data.append(new_data)
             else:
                 print("Dados do ponto em formato incorreto.")
-                return None
+                raise Exception("Dados do ponto em formato incorreto.")
             with open(f'{self.file_path}{self.selected_date}.json', 'w') as doc:
                 json.dump(current_data, doc)
                 print("Arquivo do pontista salvo.")
@@ -81,10 +86,12 @@ class ClockRegisterDocHandler:
     def view_clock_doc(self):
         current_data = self.get_json_personal()
         if current_data:
-            print(f"Folha de {self.code}")
+            print(f"Folha de {self.code} no mes")
+            print("*------------------------------*")
+            print('Dia/Mes | Hora : Minuto | Modo')
             print("*------------------------------*")
             for i  in current_data:
-                print(f'{i["Dia"]} | {i["Hora"]}:{i["Minuto"]} | {i["Modo"]}')
+                print(f'{i["Dia"]}/{i["Mes"]} | {i["Hora"]}:{i["Minuto"]} | {i["Modo"]}')
             print('')
             return
         print("Dados não encontrados.")
@@ -102,11 +109,11 @@ class ClockRegisterDocHandler:
             self.write_json_personal(new_data, [])
 
     def save_clock_day(self, new_data):
-        current_data = self.get_json_day(new_data["Mes"], new_data["Dia"])
-        if current_data and isinstance(current_data, list):
+        current_data = self.get_json_day(new_data["Mes"], new_data["Dia"], new_data["Modo"])
+        if current_data and isinstance(current_data, dict):
             self.write_json_day(new_data, current_data)
         else:
-            self.write_json_day(new_data, [])
+            self.write_json_day(new_data, self.doc_day_structure)
 
     def save_clock(self, new_data):
         try:   
@@ -192,6 +199,6 @@ class ClockDocView:
     def run(self):
         selected_month = input("Selecione um mes:\n")
         selected_year = input("Selecione um ano:\n")
-        clock_doc_cli = ClockRegisterDocHandler(self.code, f"{selected_month}-{selected_year}")
+        clock_doc_cli = ClockRegisterDocHandler(self.code, f"{selected_month.zfill(2)}-{selected_year.zfill(2)}")
         clock_doc_cli.view_clock_doc()
         

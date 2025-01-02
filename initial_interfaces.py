@@ -186,7 +186,6 @@ class SignUpInterface(UserDataHandler):
             print(f'Ocorreu um erro: {e}')
 
     def write_json(self, new_data, retrieved_data):
-        print(f'rd:\n{retrieved_data}\n')
         try:
             with open(self.file_path, "w") as db:
                 if isinstance(retrieved_data, list):
@@ -201,10 +200,8 @@ class SignUpInterface(UserDataHandler):
     def finish_data_handler(self):
         try:
             db_data = self.read_self_json()
-            print(db_data)
             if not db_data:
                 self.create_file_path()
-                print(f"ds:\n{self.data_structure}\n")
                 self.write_json(self.data_structure, [])
                 print("Cadastro realizado")
             else:
