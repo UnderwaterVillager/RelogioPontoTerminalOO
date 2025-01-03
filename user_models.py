@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 
 from clock_interfaces import  Clock, ClockDocView
+from supervisor_interfaces import WorkerListInterface
 
 class User:
     def __init__(self, code):
@@ -15,9 +16,6 @@ class User:
 class Worker(User):
     def __init__(self, code):
         super().__init__(code)
-    
-    def call_clock_doc():
-        pass
 
     def run(self):
         while True:
@@ -41,6 +39,12 @@ class Worker(User):
                     break
 
 class Supervisor(User):
+    def __init__(self, code):
+        super().__init__(code)
+
+    def assign_worker(self):
+        worker_input = WorkerListInterface(self.code)
+        worker_input.run()
 
     def run(self):
         while True:
@@ -49,7 +53,8 @@ class Supervisor(User):
             match operation:
                 case '1':
                     os.system('clear')
-                    pass
+                    self.assign_worker()
+                    continue
                 case '2':
                     os.system('clear')
                     pass

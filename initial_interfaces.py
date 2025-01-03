@@ -2,7 +2,7 @@ import os
 import json
 from abc import ABC, abstractmethod
 
-from user_models import Worker
+from user_models import Worker, Supervisor
 
 # Interfaces de login e cadastro;
 ## TODO implementar validação
@@ -270,13 +270,13 @@ class MainMenu:
                 case '1':
                     os.system('clear')
                     logged_code = self.menu_login()
-
+                    user = None
                     if logged_code:
                         match logged_code[0]:
                             case '1':
                                 user = Worker(logged_code)
                             case '2':
-                                pass
+                                user = Supervisor(logged_code)
                             case _:
                                 break
                         if user:
