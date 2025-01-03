@@ -1,6 +1,8 @@
 import os, json
 
-class WorkerListInterface:
+from clock_interfaces import ClockDocView
+
+class WorkerAssignInterface:
     def __init__(self, code):
         self._code = code
         self._file_path_worker = 'db/pontista_dados_cadastro.json'
@@ -49,14 +51,17 @@ class WorkerListInterface:
             raise Exception("Algo de errado ocorreu com a gravação de dados.")
         
     def write_json_assign_supervisor(self, workers, selected_worker, supervisor_code):
+        returning_worker = None
         try:
             for i in workers:
                 if i["Matricula"] == selected_worker:
                     i["Supervisor"] = supervisor_code
+                    returning_worker = i
                     break
             with open(self.file_path_worker, "w") as db:
                 json.dump(workers, db)
             print("Gravação concluída!")
+            return returning_worker
         except:
             print("Algo de errado ocorreu com a gravação de dados.")
             raise Exception("Algo de errado ocorreu com a gravação de dados.")
@@ -65,10 +70,10 @@ class WorkerListInterface:
     def assigning(self, worker):
         try:
             os.system('clear')
+            worker_list = self.read_json(self.file_path_worker)
+            worker_data = self.write_json_assign_supervisor(worker_list, worker, self.code)
             supervisor_data = self.read_json(self.file_path_supervisor)
-            self.write_json_assign_worker(supervisor_data, worker)
-            worker_data = self.read_json(self.file_path_worker)
-            self.write_json_assign_supervisor(worker_data, worker, self.code)
+            self.write_json_assign_worker(supervisor_data, worker_data)
             print("Pontista associado!")
         except:
             print("Erro ao associar pontista e supervisor.") 
@@ -99,3 +104,73 @@ class WorkerListInterface:
             return
         print("Pontista incorreto/indisponivel!")
 
+class WorkerViewInterface:
+    def __init__(self, code):
+        self._code = code
+        self._file_path_worker = 'db/pontista_dados_cadastro.json'
+        self._file_path_supervisor = 'db/supervisor_dados_cadastro.json'
+
+    @property
+    def code(self):
+        return self._code
+
+    @property
+    def file_path_worker(self):
+        return self._file_path_worker
+    
+    @property
+    def file_path_supervisor(self):
+        return self._file_path_supervisor
+    
+    def read_json(self, path):
+        try:
+            if (os.stat(path).st_size == 0):
+                return None
+        except FileNotFoundError:
+            return None
+        try:
+            with open(path, "r") as db:
+                data = json.load(db)
+                if data:
+                    print("Carregado!")
+            return data
+        except:
+            print("Algo deu errado na recuperação de dados")
+
+    def assigned_workers(self):
+        supervisors = self.read_json(self.file_path_supervisor)
+        assigned_workers = None
+        counter = 0
+        print("PONTISTAS ASSOCIADOS:\n---------------------------------")
+        for i in supervisors:
+            if i["Matricula"] == self.code:
+                for j in i["Pontistas"]:
+                    print(f"Nome: {j["Nome"]} | Matricula: {j["Matricula"]} | Email: {j["Email"]}\n")
+                    counter += 1
+                assigned_workers = i["Pontistas"]
+        print(f"---------------------------------\nPossui {counter} pontistas associados.")
+        return assigned_workers
+    
+    def run(self):
+        while True:
+            workers_list = self.assigned_workers()
+            if workers_list:
+                selected_worker = input("Digite um pontista, ou digite x para voltar:\n")
+                if selected_worker in [worker["Matricula"] for worker in workers_list]:
+                    while True:
+                        option = input("O que gostaria de fazer com este pontista?\n1- Ver folha de Ponto\n2- Deletar Pontista\nOutros- Voltar\n")
+                        match option:
+                            case '1':
+                                clock_doc_viewer = ClockDocView(selected_worker)
+                                clock_doc_viewer.run()
+                            case '2':
+                                continue
+                            case _:
+                                break
+                elif selected_worker == 'x':
+                    break
+                else:
+                    os.system("clear")
+                    print("Digite um pontista disponível.")
+            else:
+                break

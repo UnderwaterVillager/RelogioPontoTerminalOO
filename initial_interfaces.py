@@ -263,7 +263,7 @@ class MainMenu:
         return logged_code
     
 
-    def display_options(self):
+    def run(self):
         while(True):
             enter_option = input("Escolha a sua opção:\n1- Iniciar sessão\n2- Cadastrar-se\nOutros- Sair\n")
             match enter_option:
