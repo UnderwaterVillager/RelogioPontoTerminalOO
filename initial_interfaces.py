@@ -187,6 +187,14 @@ class SignUpInterface(UserDataHandler):
 
     def write_json(self, new_data, retrieved_data):
         try:
+            if self.file_path == 'db/pontista_dados_cadastro.json':
+                new_data["Supervisor"] = ''
+                if 'Pontistas' in new_data and isinstance(new_data, dict):
+                    new_data.pop('Pontistas')
+            else:
+                new_data["Pontistas"] = []
+                if 'Supervisor' in new_data and isinstance(new_data, dict):
+                    new_data.pop('Supervisor')
             with open(self.file_path, "w") as db:
                 if isinstance(retrieved_data, list):
                     retrieved_data.append(new_data)
