@@ -21,7 +21,7 @@ class ClockRegisterDocHandler:
     def selected_date(self):
         return self._selected_date
     
-    def get_json_day(self, month, day, mode):
+    def get_json_day(self, month, day):
         try:
             if(os.stat(f'db/folhas_diarias/{month}/{day}.json').st_size == 0):
                 return None
@@ -54,6 +54,24 @@ class ClockRegisterDocHandler:
         except:
             print('Erro ao escrever na folha do dia.')
 
+    def view_clock_day(self, month, day):
+        current_data = self.get_json_day(month, day)
+        if current_data:
+            print(f"Folha do dia {day}/{month}")
+            print("*------------------------------*")
+            print('Matricula => [Dia/Mes | (Entrada) Hora : Minuto | (Saida) Hora : Minuto]')
+            print("*------------------------------*")
+            entrada = [x for x in current_data["Entrada"]]
+            saida = [y for y in current_data["Saida"]]
+            for i in entrada:
+                for j in saida:
+                    if i["Matricula"] == j["Matricula"]:
+                        print(f"{i["Matricula"]} => [{day}/{month} | {i["Hora"]} : {i["Minuto"]} | {j["Hora"]} : {j["Minuto"]}]")
+            print("*------------------------------*")
+            input("Qualquer tecla para prosseguir\n")
+            os.system("clear")
+            return
+        print("Dados não encontrados.")
 
     def get_json_personal(self):
         try:
@@ -121,7 +139,7 @@ class ClockRegisterDocHandler:
             return
 
     def save_clock_day(self, new_data):
-        current_data = self.get_json_day(new_data["Mes"], new_data["Dia"], new_data["Modo"])
+        current_data = self.get_json_day(new_data["Mes"], new_data["Dia"])
         if current_data and isinstance(current_data, dict):
             self.write_json_day(new_data, current_data)
         else:
@@ -214,3 +232,16 @@ class ClockDocView:
         clock_doc_cli = ClockRegisterDocHandler(self.code, f"{selected_month.zfill(2)}-{selected_year.zfill(2)}")
         clock_doc_cli.view_clock_doc()
         
+class ClockDayView:
+    def __init__(self, code):
+        self._code = code
+
+    @property
+    def code(self):
+        return self._code
+
+    def run(self):
+        selected_day = input("Selecione um dia:\n")
+        selected_month = input("Selecione um mes:\n")
+        clock_doc_cli = ClockRegisterDocHandler(self.code, f"{selected_day.zfill(2)}-{selected_month.zfill(2)}")
+        clock_doc_cli.view_clock_day(selected_month, selected_day)

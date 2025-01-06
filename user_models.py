@@ -1,7 +1,7 @@
 import os
 from dataclasses import dataclass
 
-from clock_interfaces import  Clock, ClockDocView
+from clock_interfaces import  Clock, ClockDocView, ClockDayView
 from supervisor_interfaces import WorkerAssignInterface, WorkerViewInterface
 
 class User:
@@ -20,7 +20,7 @@ class Worker(User):
     def run(self):
         while True:
             print("Escolha a operação:")
-            operation = input("1- Bater ponto\n2- Ver folhas de ponto\n3- Contar faltas\nOutros- Voltar\n")
+            operation = input("1- Bater ponto\n2- Ver folhas de ponto\nOutros- Voltar\n")
             match operation:
                 case '1':
                     os.system('clear')
@@ -32,8 +32,6 @@ class Worker(User):
                     clock_doc_viewer = ClockDocView(self.code)
                     clock_doc_viewer.run()
                     continue
-                case '3':
-                    pass
                 case _:
                     os.system('clear')
                     break
@@ -50,6 +48,12 @@ class Supervisor(User):
         worker_view = WorkerViewInterface(self.code)
         worker_view.run()
 
+    def view_doc_day(self):
+        day_view = ClockDayView(self.code)
+        day_view.run()
+
+
+
     def run(self):
         while True:
             print("Escolha a operação:")
@@ -64,7 +68,9 @@ class Supervisor(User):
                     self.view_workers()
                     continue
                 case '3':
-                    pass
+                    os.system('clear')
+                    self.view_doc_day()
+                    continue
                 case _:
                     os.system('clear')
                     break
