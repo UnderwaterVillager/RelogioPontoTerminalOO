@@ -1,5 +1,4 @@
 import os
-from dataclasses import dataclass
 
 from clock_interfaces import  Clock, ClockDocView, ClockDayView
 from supervisor_interfaces import WorkerAssignInterface, WorkerViewInterface
