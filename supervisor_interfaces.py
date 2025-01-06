@@ -103,6 +103,7 @@ class WorkerAssignInterface:
             self.assigning(assigning_worker)
             return
         print("Pontista incorreto/indisponivel!")
+    
 
 class WorkerViewInterface:
     def __init__(self, code):
@@ -137,6 +138,15 @@ class WorkerViewInterface:
         except:
             print("Algo deu errado na recuperação de dados")
 
+    def write_json(self, data, path):
+        try:
+            with open(path, "w") as db:
+                json.dump(data, db)
+            print("Gravação concluída!")
+        except:
+            print("Algo de errado ocorreu com a gravação de dados.")
+            raise Exception("Algo de errado ocorreu com a gravação de dados.")
+
     def assigned_workers(self):
         supervisors = self.read_json(self.file_path_supervisor)
         assigned_workers = None
@@ -151,6 +161,39 @@ class WorkerViewInterface:
         print(f"---------------------------------\nPossui {counter} pontistas associados.")
         return assigned_workers
     
+    def unassign_from_worker(self, worker_code, supervisor_code):
+        data = self.read_json(self.file_path_worker)
+        if data:
+            for i in data:
+                if i["Matricula"] == worker_code and i["Supervisor"] == supervisor_code:
+                    i["Supervisor"] = ''
+                    self.write_json(data, self.file_path_worker)
+                    return
+        print("Não há dados sobre o pontista selecionado.")
+        raise Exception("Pontista não encontrado.")
+                    
+    def unassign_from_supervisor(self, worker_code, supervisor_code):
+        data = self.read_json(self.file_path_supervisor)
+        if data:
+            for i in data:
+                if i["Matricula"] == supervisor_code:
+                    for j in i["Pontistas"]:
+                        if j["Matricula"] == worker_code:
+                            i["Pontistas"].remove(j)
+                            self.write_json(data, self.file_path_supervisor)
+                            return
+        print("Não há dados sobre o pontista selecionado.")
+        raise Exception("Pontista não encontrado.")
+
+    
+    def unassign_worker(self, worker_code):
+        try:
+            self.unassign_from_worker(worker_code, self.code)
+            self.unassign_from_supervisor(worker_code, self.code)
+            print("Pontista desassociado.")
+        except:
+            print("Erro ao desassociar pontista.")
+    
     def run(self):
         while True:
             workers_list = self.assigned_workers()
@@ -164,7 +207,8 @@ class WorkerViewInterface:
                                 clock_doc_viewer = ClockDocView(selected_worker)
                                 clock_doc_viewer.run()
                             case '2':
-                                continue
+                                self.unassign_worker(selected_worker)
+                                break
                             case _:
                                 break
                 elif selected_worker == 'x':
