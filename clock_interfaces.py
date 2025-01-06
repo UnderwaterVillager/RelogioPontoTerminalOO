@@ -79,7 +79,7 @@ class ClockRegisterDocHandler:
                 raise Exception("Dados do ponto em formato incorreto.")
             with open(f'{self.file_path}{self.selected_date}.json', 'w') as doc:
                 json.dump(current_data, doc)
-                print("Arquivo do pontista salvo.")
+            print("Arquivo do pontista salvo.")
         except:
             print('Erro ao escrever na folha de ponto.')
             
@@ -101,12 +101,24 @@ class ClockRegisterDocHandler:
         current_data = self.get_json_personal()
         if current_data and isinstance(current_data, list):
             for i in current_data:
-                if (i['Dia'] == new_data['Dia']) and (i['Mes'] == new_data['Mes']) and (i['Ano'] == new_data['Ano']) and (i['Modo'] == new_data['Modo']):
-                    print("Não é possível bater o mesmo tipo de ponto duas vezes no dia.")
-                    raise Exception("Ponto batido no mesmo dia.")
+                if (i['Dia'] == new_data['Dia']) and (i['Mes'] == new_data['Mes']) and (i['Ano'] == new_data['Ano']):
+                    if (i['Modo'] == new_data['Modo']):
+                        print("Não é possível bater o mesmo tipo de ponto duas vezes no dia.")
+                        raise Exception("Ponto batido no mesmo dia.")
+                    elif new_data["Modo"] == "Saida":
+                        self.write_json_personal(new_data, current_data)
+                        return
+            if new_data["Modo"] == "Saida":
+                print("Não se deve bater primeiro o ponto de saida, bata o de entrada.")
+                raise Exception("Ponto de saída batido primeiro.")
             self.write_json_personal(new_data, current_data)
+            return
         else:
+            if new_data["Modo"] == "Saida":
+                print("Não se deve bater primeiro o ponto de saida, bata o de entrada.")
+                raise Exception("Ponto de saída batido primeiro.")
             self.write_json_personal(new_data, [])
+            return
 
     def save_clock_day(self, new_data):
         current_data = self.get_json_day(new_data["Mes"], new_data["Dia"], new_data["Modo"])
@@ -171,7 +183,7 @@ class Clock:
             confirm_clock = input("Bater ponto?\n1- Sim\nOutros- Voltar\n")
             match confirm_clock:
                 case '1':
-                    is_clock_on = input("Horario de entrada ou saida?\n1- Entrada\n2- Saída\nOutros- Voltar\n")
+                    is_clock_on = input("Horario de entrada ou saida?\n1- Entrada\n2- Saida\nOutros- Voltar\n")
                     match is_clock_on:
                         case '1':
                             self.current_time_fields['Modo'] = 'Entrada'
