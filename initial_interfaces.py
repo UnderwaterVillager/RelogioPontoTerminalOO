@@ -4,14 +4,10 @@ from abc import ABC, abstractmethod
 
 from user_models import Worker, Supervisor
 
-# Interfaces de login e cadastro;
-## TODO implementar validação
-## Cada validação pode ser instanciada no setter
 class UserDataHandler(ABC):
     def __init__(self):
         self._file_path = None
         self._menu_type = None
-        ### Campo útil a possível valições;
         self._data_structure = {
             "Matricula" : None,
             "Senha": None,
@@ -72,7 +68,6 @@ class UserDataHandler(ABC):
             obj_ds[i] = prompt_data
         self.data_structure = obj_ds
 
-    ### Cada setter retorna o valor validado e o estado de validação
     def set_data(self):
         self.code = self.data_structure["Matricula"]
 
@@ -94,7 +89,6 @@ class UserDataHandler(ABC):
         except:
             print("Algo deu errado na recuperação de dados")
 
-## Validação não prioritária;
     def menu(self):
         while(True):
             print(f"Esta é a tela de {self.menu_type}")
@@ -199,7 +193,6 @@ class SignUpInterface(UserDataHandler):
                 if isinstance(retrieved_data, list):
                     retrieved_data.append(new_data)
                 json.dump(retrieved_data, db)
-            print("Gravação concluída!")
         except:
             print("Algo de errado ocorreu com a gravação de dados.")
             raise Exception("Algo de errado ocorreu com a gravação de dados.")

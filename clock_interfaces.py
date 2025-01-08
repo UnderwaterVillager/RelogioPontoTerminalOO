@@ -26,12 +26,10 @@ class ClockRegisterDocHandler:
             if(os.stat(f'db/folhas_diarias/{month}/{day}.json').st_size == 0):
                 return None
         except FileNotFoundError:
-            print("Arquivo do dia não encontrado.")
             return None
         try:
             with open(f'db/folhas_diarias/{month}/{day}.json') as doc:
                 day_dict = json.load(doc)
-                print("Carregado ao dia.")
                 return day_dict
         except:
             print("Erro ao carregar folha do dia.")
@@ -63,10 +61,17 @@ class ClockRegisterDocHandler:
             print("*------------------------------*")
             entrada = [x for x in current_data["Entrada"]]
             saida = [y for y in current_data["Saida"]]
+            has_exit = False
             for i in entrada:
+                print(f"{i['Matricula']} => [{day}/{month} | {i['Hora']} : {i['Minuto']} |", end='')
                 for j in saida:
-                    if i["Matricula"] == j["Matricula"]:
-                        print(f"{i["Matricula"]} => [{day}/{month} | {i["Hora"]} : {i["Minuto"]} | {j["Hora"]} : {j["Minuto"]}]")
+                    has_exit = i["Matricula"] == j["Matricula"]
+                    if has_exit:
+                        print(f" {j['Hora']} : {j['Minuto']}]")
+                        break
+                if has_exit == False:
+                    print(" XX : XX]\n")
+                
             print("*------------------------------*")
             input("Qualquer tecla para prosseguir\n")
             os.system("clear")
@@ -78,12 +83,10 @@ class ClockRegisterDocHandler:
             if (os.stat(f'{self.file_path}{self.selected_date}.json').st_size == 0):
                 return None
         except FileNotFoundError:
-            print("Arquivo do pontista não encontrado.")
             return None
         try:
             with open(f'{self.file_path}{self.selected_date}.json', 'r') as doc:
                 clock_list = json.load(doc)
-                print("Carregado ao pontista.")
                 return clock_list
         except:
             print("Erro ao carregar folha de ponto.")
@@ -112,7 +115,9 @@ class ClockRegisterDocHandler:
                 print(f'{i["Dia"]}/{i["Mes"]} | {i["Hora"]}:{i["Minuto"]} | {i["Modo"]}')
             print('')
             return
-        print("Dados não encontrados.")
+        print("Não existe ponto para a data fornecida.")
+        input("Qualquer tecla para prosseguir\n")
+        os.system("clear")
 
 
     def save_clock_personal(self, new_data):

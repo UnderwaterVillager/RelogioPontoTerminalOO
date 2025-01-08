@@ -30,8 +30,6 @@ class WorkerAssignInterface:
         try:
             with open(path, "r") as db:
                 data = json.load(db)
-                if data:
-                    print("Carregado!")
             return data
         except:
             print("Algo deu errado na recuperação de dados")
@@ -45,7 +43,6 @@ class WorkerAssignInterface:
                         break
             with open(self.file_path_supervisor, "w") as db:
                 json.dump(data, db)
-            print("Gravação concluída!")
         except:
             print("Algo de errado ocorreu com a gravação de dados.")
             raise Exception("Algo de errado ocorreu com a gravação de dados.")
@@ -60,7 +57,6 @@ class WorkerAssignInterface:
                     break
             with open(self.file_path_worker, "w") as db:
                 json.dump(workers, db)
-            print("Gravação concluída!")
             return returning_worker
         except:
             print("Algo de errado ocorreu com a gravação de dados.")
@@ -88,7 +84,7 @@ class WorkerAssignInterface:
             print("PONTISTAS DISPONIVEIS:\n---------------------------------")
             for i in worker_list:
                 if i["Supervisor"] == '':
-                    print(f"Nome: {i["Nome"]} | Matricula: {i["Matricula"]} | Email: {i["Email"]}\n")
+                    print(f"Nome: {i['Nome']} | Matricula: {i['Matricula']} | Email: {i['Email']}\n")
                     counter += 1    
             print(f"---------------------------------\n{counter} pontistas disponiveis.")
             if counter > 0:
@@ -103,6 +99,8 @@ class WorkerAssignInterface:
             self.assigning(assigning_worker)
             return
         print("Pontista incorreto/indisponivel!")
+        input("Digite qualquer coisa para continuar.")
+        os.system("clear")
     
 
 class WorkerViewInterface:
@@ -126,14 +124,12 @@ class WorkerViewInterface:
     def read_json(self, path):
         try:
             if (os.stat(path).st_size == 0):
-                return None
+                return None 
         except FileNotFoundError:
             return None
         try:
             with open(path, "r") as db:
                 data = json.load(db)
-                if data:
-                    print("Carregado!")
             return data
         except:
             print("Algo deu errado na recuperação de dados")
@@ -142,7 +138,6 @@ class WorkerViewInterface:
         try:
             with open(path, "w") as db:
                 json.dump(data, db)
-            print("Gravação concluída!")
         except:
             print("Algo de errado ocorreu com a gravação de dados.")
             raise Exception("Algo de errado ocorreu com a gravação de dados.")
@@ -155,7 +150,7 @@ class WorkerViewInterface:
         for i in supervisors:
             if i["Matricula"] == self.code:
                 for j in i["Pontistas"]:
-                    print(f"Nome: {j["Nome"]} | Matricula: {j["Matricula"]} | Email: {j["Email"]}\n")
+                    print(f"Nome: {j['Nome']} | Matricula: {j['Matricula']} | Email: {j['Email']}\n")
                     counter += 1
                 assigned_workers = i["Pontistas"]
         print(f"---------------------------------\nPossui {counter} pontistas associados.")
@@ -210,8 +205,10 @@ class WorkerViewInterface:
                                 self.unassign_worker(selected_worker)
                                 break
                             case _:
+                                os.system("clear")
                                 break
                 elif selected_worker == 'x':
+                    os.system("clear")
                     break
                 else:
                     os.system("clear")
