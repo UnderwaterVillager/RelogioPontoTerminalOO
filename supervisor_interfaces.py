@@ -196,7 +196,7 @@ class WorkerViewInterface:
                 selected_worker = input("Digite um pontista, ou digite x para voltar:\n")
                 if selected_worker in [worker["Matricula"] for worker in workers_list]:
                     while True:
-                        option = input("O que gostaria de fazer com este pontista?\n1- Ver folha de Ponto\n2- Deletar Pontista\nOutros- Voltar\n")
+                        option = input("O que gostaria de fazer com este pontista?\n1- Ver folha de Ponto\n2- Desassociar Pontista\nOutros- Voltar\n")
                         match option:
                             case '1':
                                 clock_doc_viewer = ClockDocView(selected_worker)
